@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/src/screens/registration_screen.dart';
 
 import 'src/screens/login_screen.dart';
 import 'src/screens/welcome_screen.dart';
@@ -13,7 +14,8 @@ void main() {
     initialRoute: WelcomeScreen.routeName,
     routes: <String, WidgetBuilder>{
       LoginScreen.routeName: (BuildContext context) => LoginScreen(),
-      WelcomeScreen.routeName: (BuildContext context) => WelcomeScreen()
+      WelcomeScreen.routeName: (BuildContext context) => WelcomeScreen(),
+      RegistrationScreen.routeName: (BuildContext context) => RegistrationScreen()
     },
   ));
 }

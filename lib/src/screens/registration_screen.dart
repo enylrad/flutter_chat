@@ -3,14 +3,14 @@ import 'package:flutter_chat/src/widgets/app_button.dart';
 import 'package:flutter_chat/src/widgets/app_icon.dart';
 import 'package:flutter_chat/src/widgets/app_textfield.dart';
 
-class LoginScreen extends StatefulWidget {
-  static const String routeName = '/login';
+class RegistrationScreen extends StatefulWidget {
+  static const String routeName = '/registration';
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,21 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 48.0,
             ),
             AppTextField(
-              hint: "Enter email",
+              hint: 'Enter email',
               textInputType: TextInputType.emailAddress,
             ),
             SizedBox(
               height: 8.0,
             ),
             AppTextField(
-              hint: "Enter password",
+              hint: 'Enter password',
               obscure: true,
             ),
             SizedBox(
               height: 23.0,
             ),
             AppButton(
-                color: Colors.lightBlueAccent, name: 'Log in', onPressed: () {})
+              color: Colors.blueAccent,
+              onPressed: () {},
+              name: 'Sign up',
+            )
           ],
         ),
       ),

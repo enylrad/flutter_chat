@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/src/screens/login_screen.dart';
+import 'package:flutter_chat/src/screens/registration_screen.dart';
 import 'package:flutter_chat/src/widgets/app_button.dart';
 import 'package:flutter_chat/src/widgets/app_icon.dart';
 
@@ -30,8 +31,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 onPressed: () =>
                     Navigator.pushNamed(context, LoginScreen.routeName)),
             AppButton(
-                color: Colors.blueAccent, name: 'Sign up', onPressed: () => {})
-          ],
+                color: Colors.blueAccent,
+                name: 'Sign up',
+                onPressed: () =>
+                    Navigator.pushNamed(context, RegistrationScreen.routeName)),
+      ],
         ),
       ),
     );
