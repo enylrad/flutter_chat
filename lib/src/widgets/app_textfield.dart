@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class AppTextField extends StatelessWidget {
   final String hint;
+  final ValueChanged<String> onChanged;
   final bool obscure;
   final TextInputType textInputType;
 
-  AppTextField({this.hint, this.textInputType, this.obscure = false});
+  AppTextField(
+      {this.hint, this.onChanged, this.textInputType, this.obscure = false});
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +27,8 @@ class AppTextField extends StatelessWidget {
                   BorderSide(color: Colors.lightBlueAccent, width: 2.0)),
           border: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(32.0)))),
+      onChanged: onChanged,
+      textAlign: TextAlign.center,
     );
   }
 }
