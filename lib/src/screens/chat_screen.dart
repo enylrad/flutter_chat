@@ -36,6 +36,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat Screen'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.power_settings_new),
+            onPressed: () {
+              Authentication().singOut();
+              Navigator.pop(context);
+            },
+          )
+        ],
       ),
     );
   }

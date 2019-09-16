@@ -16,6 +16,21 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   String _email;
   String _password;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focusNode.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +47,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             AppTextField(
               hint: "Enter email",
+              focusNode: _focusNode,
               textInputType: TextInputType.emailAddress,
               onChanged: (value) => _email = value,
+              controller: _emailController,
             ),
             SizedBox(
               height: 8.0,
@@ -42,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
               hint: "Enter password",
               obscure: true,
               onChanged: (value) => _password = value,
+              controller: _passwordController,
             ),
             SizedBox(
               height: 23.0,
@@ -55,6 +73,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (user != null) {
                     Navigator.pushNamed(context, ChatScreen.routeName);
                   }
+                  FocusScope.of(context).requestFocus(_focusNode);
+                  _emailController.text = "";
+                  _passwordController.text = "";
                 })
           ],
         ),

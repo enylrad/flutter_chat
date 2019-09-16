@@ -16,6 +16,21 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   String _email;
   String _password;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focusNode.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +46,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 48.0,
             ),
             AppTextField(
+              controller: _emailController,
               hint: 'Enter email',
+              focusNode: _focusNode,
               textInputType: TextInputType.emailAddress,
               onChanged: (value) {
                 _email = value;
@@ -41,6 +58,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               height: 8.0,
             ),
             AppTextField(
+              controller: _passwordController,
               hint: 'Enter password',
               obscure: true,
               onChanged: (value) {
@@ -58,6 +76,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 if (user != null) {
                   Navigator.pushNamed(context, ChatScreen.routeName);
                 }
+
+                FocusScope.of(context).requestFocus(_focusNode);
+                _emailController.text = "";
+                _passwordController.text = "";
               },
               name: 'Sign up',
             )
