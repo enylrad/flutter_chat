@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/src/services/authentication.dart';
 
 class ChatScreen extends StatefulWidget {
   static const String routeName = '/chat';
@@ -20,9 +21,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void getCurrentUser() async {
     try {
-      var user = await auth.currentUser();
+      var user = Authentication().getCurrentUser();
       if (user != null) {
-        loggedUser = user;
+        loggedUser = user as FirebaseUser;
         print(loggedUser.email);
       }
     } catch (e) {
