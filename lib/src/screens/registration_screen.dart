@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat/src/mixins/validator_mixins.dart';
 import 'package:flutter_chat/src/screens/chat_screen.dart';
 import 'package:flutter_chat/src/services/authentication.dart';
 import 'package:flutter_chat/src/widgets/app_button.dart';
@@ -14,13 +15,14 @@ class RegistrationScreen extends StatefulWidget {
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
-  String _email;
-  String _password;
+class _RegistrationScreenState extends State<RegistrationScreen>
+    with ValidatorMixins {
   TextEditingController _emailController;
   TextEditingController _passwordController;
   FocusNode _focusNode;
   bool _showProgress = false;
+  bool _autovalidate = false;
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
   void setProgressStatus(bool status) {
     setState(() {
@@ -47,59 +49,72 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
         body: ModalProgressHUD(
       inAsyncCall: _showProgress,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 25.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            AppIcon(),
-            SizedBox(
-              height: 48.0,
+      child: Form(
+          key: _formKey,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 25.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                AppIcon(),
+                SizedBox(height: 48.0),
+                _emailField(),
+                SizedBox(height: 8.0),
+                _passwordField(),
+                SizedBox(height: 23.0),
+                _submitButton(context)
+              ],
             ),
-            AppTextField(
-              controller: _emailController,
-              hint: 'Enter email',
-              focusNode: _focusNode,
-              textInputType: TextInputType.emailAddress,
-              onChanged: (value) {
-                _email = value;
-              },
-            ),
-            SizedBox(
-              height: 8.0,
-            ),
-            AppTextField(
-              controller: _passwordController,
-              hint: 'Enter password',
-              obscure: true,
-              onChanged: (value) {
-                _password = value;
-              },
-            ),
-            SizedBox(
-              height: 23.0,
-            ),
-            AppButton(
-              color: Colors.blueAccent,
-              onPressed: () async {
-                setProgressStatus(true);
-                final FirebaseUser user = await Authentication()
-                    .createUser(email: _email, password: _password);
-                if (user != null) {
-                  Navigator.pushNamed(context, ChatScreen.routeName);
-                }
-
-                FocusScope.of(context).requestFocus(_focusNode);
-                _emailController.text = "";
-                _passwordController.text = "";
-                setProgressStatus(false);
-              },
-              name: 'Sign up',
-            )
-          ],
-        ),
-      ),
+          )),
     ));
+  }
+
+  Widget _emailField() {
+    return AppTextField(
+      validator: validateEmail,
+      controller: _emailController,
+      hint: 'Enter email',
+      focusNode: _focusNode,
+      textInputType: TextInputType.emailAddress,
+      autoValidate: _autovalidate,
+    );
+  }
+
+  Widget _passwordField() {
+    return AppTextField(
+      validator: validatePassword,
+      controller: _passwordController,
+      hint: 'Enter password',
+      obscure: true,
+      autoValidate: _autovalidate,
+    );
+  }
+
+  Widget _submitButton(BuildContext context) {
+    return AppButton(
+      color: Colors.blueAccent,
+      onPressed: () async {
+        if (_formKey.currentState.validate()) {
+          setProgressStatus(true);
+          final FirebaseUser user = await Authentication().createUser(
+              email: _emailController.text, password: _passwordController.text);
+          if (user != null) {
+            Navigator.pushNamed(context, ChatScreen.routeName);
+          }
+
+          _autovalidate = false;
+          FocusScope.of(context).requestFocus(_focusNode);
+          _emailController.text = "";
+          _passwordController.text = "";
+          setProgressStatus(false);
+        } else {
+          setState(() {
+            _autovalidate = true;
+          });
+        }
+      },
+      name: 'Sign up',
+    );
   }
 }
