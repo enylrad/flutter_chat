@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/src/mixins/validator_mixins.dart';
 import 'package:flutter_chat/src/screens/chat_screen.dart';
 import 'package:flutter_chat/src/services/authentication.dart';
 import 'package:flutter_chat/src/widgets/app_button.dart';
+import 'package:flutter_chat/src/widgets/app_error_message.dart';
 import 'package:flutter_chat/src/widgets/app_icon.dart';
 import 'package:flutter_chat/src/widgets/app_textfield.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -15,13 +15,14 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with ValidatorMixins{
+class _LoginScreenState extends State<LoginScreen> with ValidatorMixins {
   TextEditingController _emailController;
   TextEditingController _passwordController;
   FocusNode _focusNode;
   bool _showProgress = false;
   bool _autovalidate = false;
   final GlobalKey<FormState> _formKey = GlobalKey();
+  String _errorMessage = "";
 
   void setProgressStatus(bool status) {
     setState(() {
@@ -62,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> with ValidatorMixins{
                 SizedBox(height: 8.0),
                 _passwordField(),
                 SizedBox(height: 23.0),
+                _showErrorMessage(),
                 _submitButton(context)
               ],
             ),
@@ -95,18 +97,21 @@ class _LoginScreenState extends State<LoginScreen> with ValidatorMixins{
         color: Colors.lightBlueAccent,
         name: 'Log in',
         onPressed: () async {
-          if(_formKey.currentState.validate()) {
+          if (_formKey.currentState.validate()) {
             setProgressStatus(true);
-            final FirebaseUser user = await Authentication()
-                .loginUser(email: _emailController.text, password: _passwordController.text);
-            if (user != null) {
+            var auth = await Authentication().loginUser(
+                email: _emailController.text,
+                password: _passwordController.text);
+            if (auth.success) {
               Navigator.pushNamed(context, ChatScreen.routeName);
+              FocusScope.of(context).requestFocus(_focusNode);
+              _emailController.text = "";
+              _passwordController.text = "";
+            } else {
+              setState(() {
+                _errorMessage = auth.errorMessage;
+              });
             }
-
-            _autovalidate = false;
-            FocusScope.of(context).requestFocus(_focusNode);
-            _emailController.text = "";
-            _passwordController.text = "";
             setProgressStatus(false);
           } else {
             setState(() {
@@ -114,5 +119,15 @@ class _LoginScreenState extends State<LoginScreen> with ValidatorMixins{
             });
           }
         });
+  }
+
+  Widget _showErrorMessage() {
+    if (_errorMessage.length > 0 && _errorMessage != null) {
+      return ErrorMessage(errorMessage: _errorMessage);
+    } else {
+      return Container(
+        height: 0.0,
+      );
+    }
   }
 }

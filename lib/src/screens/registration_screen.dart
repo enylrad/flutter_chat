@@ -4,6 +4,7 @@ import 'package:flutter_chat/src/mixins/validator_mixins.dart';
 import 'package:flutter_chat/src/screens/chat_screen.dart';
 import 'package:flutter_chat/src/services/authentication.dart';
 import 'package:flutter_chat/src/widgets/app_button.dart';
+import 'package:flutter_chat/src/widgets/app_error_message.dart';
 import 'package:flutter_chat/src/widgets/app_icon.dart';
 import 'package:flutter_chat/src/widgets/app_textfield.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -23,6 +24,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   bool _showProgress = false;
   bool _autovalidate = false;
   final GlobalKey<FormState> _formKey = GlobalKey();
+  String _errorMessage = "";
 
   void setProgressStatus(bool status) {
     setState(() {
@@ -63,6 +65,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                 SizedBox(height: 8.0),
                 _passwordField(),
                 SizedBox(height: 23.0),
+                _showErrorMessage(),
                 _submitButton(context)
               ],
             ),
@@ -97,16 +100,19 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       onPressed: () async {
         if (_formKey.currentState.validate()) {
           setProgressStatus(true);
-          final FirebaseUser user = await Authentication().createUser(
+          var auth = await Authentication().createUser(
               email: _emailController.text, password: _passwordController.text);
-          if (user != null) {
+          if (auth.success) {
             Navigator.pushNamed(context, ChatScreen.routeName);
+            FocusScope.of(context).requestFocus(_focusNode);
+            _emailController.text = "";
+            _passwordController.text = "";
+          }else{
+            setState(() {
+              _errorMessage = auth.errorMessage;
+            });
           }
 
-          _autovalidate = false;
-          FocusScope.of(context).requestFocus(_focusNode);
-          _emailController.text = "";
-          _passwordController.text = "";
           setProgressStatus(false);
         } else {
           setState(() {
@@ -116,5 +122,15 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       },
       name: 'Sign up',
     );
+  }
+
+  Widget _showErrorMessage() {
+    if (_errorMessage.length > 0 && _errorMessage != null) {
+      return ErrorMessage(errorMessage: _errorMessage);
+    } else {
+      return Container(
+        height: 0.0,
+      );
+    }
   }
 }
