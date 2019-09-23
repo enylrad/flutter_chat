@@ -8,11 +8,7 @@ class MessageService {
     _fireStore.collection(_collectionName).add(collectionValues);
   }
 
-  Future<QuerySnapshot> getMessages() async {
-    return await _fireStore.collection(_collectionName).getDocuments();
-  }
-
   Stream<QuerySnapshot> getMessagesStream() {
-    return _fireStore.collection(_collectionName).snapshots();
+    return _fireStore.collection(_collectionName).orderBy("timestamps").snapshots();
   }
 }

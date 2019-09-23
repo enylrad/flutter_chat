@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat/src/services/authentication.dart';
@@ -33,7 +34,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _getCurrentUser();
-    _getMessages();
   }
 
   void _getCurrentUser() async {
@@ -44,14 +44,6 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     } catch (e) {}
-  }
-
-  void _getMessages() async {
-    await for (var snapshot in MessageService().getMessagesStream()) {
-      for (var message in snapshot.documents) {
-        print(message.data);
-      }
-    }
   }
 
   @override
@@ -75,19 +67,9 @@ class _ChatScreenState extends State<ChatScreen> {
             StreamBuilder(
               stream: MessageService().getMessagesStream(),
               builder: (context, snapshot) {
-                List<Text> messageWidgets = [];
-                if (snapshot.hasData) {
-                  var messages = snapshot.data.documents;
-                  for (var message in messages) {
-                    final messageValue = message.data["value"];
-                    final messageSender = message.data["sender"];
-                    messageWidgets.add(Text('$messageValue de $messageSender',
-                    style: TextStyle(fontSize: 16.0),));
-                  }
-                } else {}
                 return Flexible(
                     child: ListView(
-                  children: messageWidgets,
+                  children: _getChatItems(snapshot.data.documents),
                 ));
               },
             ),
@@ -114,10 +96,68 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  List<ChatItem> _getChatItems(dynamic messages) {
+    List<ChatItem> chatItems = [];
+    for (var message in messages) {
+      final messageValue = message.data["value"];
+      final messageSender = message.data["sender"];
+      chatItems.add(ChatItem(
+          message: messageValue,
+          sender: messageSender,
+          isMe: messageSender == loggedUser.email));
+    }
+    return chatItems;
+  }
+
   void _sendMessage() {
-    MessageService().save(collectionValues: {
-      'value': _messageController.text,
-      'sender': loggedUser.uid
-    });
+    if (_messageController.text.trim().isNotEmpty) {
+      MessageService().save(collectionValues: {
+        'value': _messageController.text,
+        'sender': loggedUser.email,
+        'timestamps': FieldValue.serverTimestamp()
+      });
+      _messageController.clear();
+    }
+  }
+}
+
+class ChatItem extends StatelessWidget {
+  final String sender;
+  final String message;
+  final bool isMe;
+
+  ChatItem({this.sender, this.message, this.isMe});
+
+  @override
+  Widget build(BuildContext context) {
+    var alignment = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    var backgroundColor = isMe ? Colors.blueAccent : Colors.white;
+    var textColor = isMe ? Colors.white : Colors.black54;
+    return Container(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: alignment,
+        children: <Widget>[
+          Text(
+            sender,
+            style: TextStyle(fontSize: 14.0, color: Colors.grey),
+          ),
+          Material(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30.0),
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0)),
+              elevation: 5.0,
+              color: backgroundColor,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                child: Text(
+                  message,
+                  style: TextStyle(fontSize: 16.0, color: textColor),
+                ),
+              ))
+        ],
+      ),
+    );
   }
 }
